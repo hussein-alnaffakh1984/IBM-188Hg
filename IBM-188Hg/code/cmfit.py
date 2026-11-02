@@ -10,12 +10,12 @@ from ibmcm import *
 from scipy.optimize import least_squares
 
 m = IBMCM(10); Ms = list(range(-2, 11)); SQWU = math.sqrt(5.94e-6 * 188 ** (4 / 3))
-NAMES = ['eN', 'kN', 'cN', 'kI', 'cI', 'qN', 'qI', 'D', 'w0', 'w2', 'kpN', 'kpI']
+NAMES = ['eN', 'kN', 'cN', 'kI', 'cI', 'qN', 'qI', 'D', 'w0', 'w2', 'kpN', 'kpI', 'eI']
 BASE = dict(eN=623.123, kN=-53.672, cN=0.071, kI=-42.519, cI=0.020, qN=1.312, qI=1.816,
-            D=3480.0, w0=9.258, w2=9.258, kpN=0.0, kpI=0.0)
-SCALE = dict(eN=100, kN=5, cN=0.2, kI=5, cI=0.2, qN=0.3, qI=0.3, D=300, w0=5, w2=5, kpN=2, kpI=2)
-LB = dict(eN=0, kN=-150, cN=-1.3229, kI=-150, cI=-1.3229, qN=0.3, qI=0.3, D=1000, w0=0, w2=0, kpN=-50, kpI=-50)
-UB = dict(eN=2000, kN=-1, cN=1.3229, kI=-1, cI=1.3229, qN=4, qI=4, D=8000, w0=150, w2=150, kpN=50, kpI=50)
+            D=3480.0, w0=9.258, w2=9.258, kpN=0.0, kpI=0.0, eI=0.0)
+SCALE = dict(eN=100, kN=5, cN=0.2, kI=5, cI=0.2, qN=0.3, qI=0.3, D=300, w0=5, w2=5, kpN=2, kpI=2, eI=50)
+LB = dict(eN=0, kN=-150, cN=-1.3229, kI=-150, cI=-1.3229, qN=0.3, qI=0.3, D=1000, w0=0, w2=0, kpN=-50, kpI=-50, eI=-1000)
+UB = dict(eN=2000, kN=-1, cN=1.3229, kI=-1, cI=1.3229, qN=4, qI=4, D=8000, w0=150, w2=150, kpN=50, kpI=50, eI=1000)
 
 EXP_E = [((2, 'R'), 412.9), ((4, 'R'), 1004.9), ((6, 'R'), 1777.2), ((8, 'R'), 2422.5),
          ((0, 'I'), 824.5), ((2, 'I'), 881.1), ((4, 'I'), 1207.9), ((6, 'I'), 1509.2), ((8, 'I'), 1969.9), ((10, 'I'), 2490.8),
@@ -37,6 +37,7 @@ def LLblocks():
 def build_H(P):
     HA = P['eN'] * m.nda + P['kN'] * m.QQ(m.a, P['cN'], 'a')
     HB = P['kI'] * m.QQ(m.b, P['cI'], 'b') + P['D'] * sps.identity(m.db)
+    if P.get('eI', 0.0): HB = HB + P['eI'] * m.ndb
     if P['kpN'] or P['kpI']:
         LA, LB_ = LLblocks(); HA = HA + P['kpN'] * LA; HB = HB + P['kpI'] * LB_
     V = P['w0'] * m.Smix + P['w2'] * m.Dmix
@@ -98,6 +99,22 @@ if __name__ == '__main__':
     FREE8 = ['eN', 'kN', 'cN', 'kI', 'cI', 'qN', 'qI', 'w0']
     t0 = time.time(); result = {}
     def tie(P): P['w2'] = P['w0']; return P
+    if cfg == 'spec':
+        # generic run: python3 cmfit.py spec '<json>' ; json keys: name, free, fixed, starts, max_nfev, tie_w
+        import json as _j
+        sp = _j.loads(sys.argv[2]); name = sp['name']
+        if sp.get('tie_w', True) and 'w2' not in sp['free']:
+            orig = evaluate
+            def evaluate_tied(P, *a, **k):
+                Q = dict(P); Q['w2'] = Q['w0']; return orig(Q, *a, **k)
+            globals()['evaluate'] = evaluate_tied
+        fixed = sp.get('fixed', {})
+        if sp.get('tie_w', True) and 'w0' in fixed and 'w2' not in fixed: fixed['w2'] = fixed['w0']
+        P, c2, err = fit(sp['free'], fixed, starts=sp.get('starts', [{}]), max_nfev=sp.get('max_nfev', 150), tag=name)
+        if sp.get('tie_w', True) and 'w2' not in sp['free']: P['w2'] = P['w0']
+        res, rows, r = evaluate(P, ret=True)
+        json.dump(dict(cfg=name, P=P, chi2=c2, err=err, rows=rows), open(f'fit_{name}.json', 'w'), indent=1, default=float)
+        print('DONE', name, 'chi2 %.3f' % c2, 'time %.0fs' % (time.time() - t0)); sys.exit(0)
     if cfg == 'main_check':
         # re-evaluate final published fit, give pulls
         P = dict(BASE); res, rows, r = evaluate(P, ret=True)

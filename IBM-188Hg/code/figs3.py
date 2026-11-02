@@ -63,7 +63,7 @@ fig.tight_layout(); fig.savefig('fig3/fig3.png'); plt.close()
 print('A',[round(W(j,k),1) for j,k in zip(JA,kA)],'H',[round(W(j,k),1) for j,k in zip(JHh,kH)])
 # Fig 4 PES
 z=np.load('pes_fit_kpboth.npz'); nb=41; bs,gs=z['bs'][:nb],z['gs']
-def polar(ax,E,title,levels):
+def polar(ax,E,title,levels,bs=None,gs=None):
     B,G=np.meshgrid(bs,np.radians(gs),indexing='ij'); X=B*np.cos(G); Y=B*np.sin(G)
     cs=ax.contourf(X,Y,E,levels=levels,cmap='Blues_r',extend='max'); ax.contour(X,Y,E,levels=levels,colors='k',linewidths=0.3)
     th=np.radians(np.linspace(0,60,50)); bmax=bs[-1]
@@ -74,11 +74,13 @@ def polar(ax,E,title,levels):
     ax.set_xlim(-0.1,bmax+0.4); ax.set_ylim(-0.32,bmax*0.9); ax.set_aspect('equal'); ax.axis('off'); ax.set_title(title,fontsize=9); return cs
 fig,axs=plt.subplots(1,2,figsize=(7.4,3.7))
 E1=z['E1'][:nb]-z['E1'][:nb].min()
-cs=polar(axs[0],E1,'(a) IBM-1 (O(6) Hamiltonian, Table 2)',np.arange(0,2.01,0.1))
+b_c,g_c=bs,gs
+cs=polar(axs[0],E1,'(a) IBM-1 (O(6) Hamiltonian, Table 2)',np.arange(0,2.01,0.1),bs=b_c,gs=g_c)
 b1=bs[np.argmin(E1[:,0])]; th=np.radians(np.linspace(0,60,40)); axs[0].plot(b1*np.cos(th),b1*np.sin(th),color=C2,lw=1.6,ls='--')
 cb=fig.colorbar(cs,ax=axs[0],shrink=0.7,pad=0.0); cb.set_label('E (MeV)',fontsize=8)
+zf=np.load('pes_fine_kpboth.npz'); bs,gs=zf['bs'],zf['gs']; z={k:zf[k] for k in ['EL','EB']}; nb=len(bs)
 EL=(z['EL'][:nb]-z['EL'][:nb].min())/1000
-cs=polar(axs[1],EL,'(b) IBM-CM final (lowest eigen-surface)',np.arange(0,2.01,0.1))
+cs=polar(axs[1],EL,'(b) IBM-CM final (lowest eigen-surface)',np.arange(0,2.01,0.1),bs=bs,gs=gs)
 k=np.unravel_index(np.argmin(z['EL'][:nb]),z['EL'][:nb].shape); bmin,gmin=bs[k[0]],np.radians(gs[k[1]])
 axs[1].plot(bmin*np.cos(gmin),bmin*np.sin(gmin),'*',color=C2,ms=11,mec='k',mew=0.5,clip_on=False,zorder=10)
 kb=np.unravel_index(np.argmin(z['EB'][:nb]),z['EB'][:nb].shape); bI,gI=bs[kb[0]],np.radians(gs[kb[1]])

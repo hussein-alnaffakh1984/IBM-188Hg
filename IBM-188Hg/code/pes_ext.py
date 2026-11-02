@@ -4,14 +4,16 @@ from c7c_coh import coh
 m=C.m
 f=sys.argv[1]; P=json.load(open(f))['P']
 H=C.build_H(P).tocsr(); HA=H[:m.da,:m.da]; HB=H[m.da:,m.da:]; V=H[m.da:,:m.da]
-bs=np.linspace(0,3,61); gs=np.linspace(0,60,13)
+import os
+NB=int(os.environ.get("NB","61")); BMAX=float(os.environ.get("BMAX","3")); NG=int(os.environ.get("NG","13"))
+bs=np.linspace(0,BMAX,NB); gs=np.linspace(0,60,NG)
 EA=np.zeros((len(bs),len(gs))); EB=EA.copy(); EL=EA.copy()
 for i,b in enumerate(bs):
     for j,g in enumerate(gs):
         a=coh(10,b,g); c=coh(12,b,g); ea=a@HA@a; eb=c@HB@c; om=c@V@a
         EA[i,j]=ea; EB[i,j]=eb; EL[i,j]=0.5*(ea+eb)-math.sqrt(0.25*(ea-eb)**2+om**2)
 old=np.load('pes14.npz')
-np.savez('pes_'+f.replace('.json','.npz'),bs=bs,gs=gs,EA=EA,EB=EB,EL=EL,E1=old['E1'])
+np.savez(os.environ.get('OUT','pes_'+f.replace('.json','.npz')),bs=bs,gs=gs,EA=EA,EB=EB,EL=EL,E1=old['E1'])
 k=np.unravel_index(np.argmin(EL),EL.shape); m0=EL[k]
 print('min beta',bs[k[0]],'gamma',gs[k[1]],'depth',round(EL[0,0]-m0,1))
 for b in [0.3,0.5,bs[k[0]],0.8,1.0]:

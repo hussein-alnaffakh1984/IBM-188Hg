@@ -96,3 +96,18 @@ JSON outputs of every fit (`fit_*.json`; `fit_kpboth.json` is the final fit, `fi
 ## Licence
 
 MIT. If you use these codes, please cite the paper.
+
+## Additional robustness runs (response to referees, round 2)
+
+```
+bash runspecs.sh        # 20 fits listed in specs.txt (cmfit.py spec mode):
+                        #  F_eI (eps_{N+2} free), F_D / R_D (Delta free), F_cN0 (chi_N = 0),
+                        #  F_w*/R_w* (w profile at Delta = 3480 keV), F_D*/R_D* (Delta profile)
+python3 chain.py R      # Delta profile, restricted Hamiltonian, warm-started chain (chain_R.json)
+python3 chain.py F      # Delta profile, final Hamiltonian (chain_F.json)
+python3 lowD.py         # final Hamiltonian at Delta = 2.5 and 3.0 MeV from the Delta-free solution
+python3 w2scan_final.py # w2 scan with w0 re-optimised, final Hamiltonian
+python3 fig5.py         # Fig. 5 (chi^2 profiles in w and Delta)
+NB=81 BMAX=2 NG=25 OUT=pes_fine_kpboth.npz python3 pes_ext.py fit_kpboth.json   # fine-grid surface for Fig. 4b
+```
+`F_*` = final Hamiltonian (kappa'_N, kappa'_{N+2} free); `R_*` = restricted Hamiltonian. `dprofile.json` collects the converged Delta profile with the ground-state intruder admixture.
