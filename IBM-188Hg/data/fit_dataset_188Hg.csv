@@ -1,0 +1,28 @@
+# IBM-CM fit data set for 188Hg (used in cmfit.py / c14.py). Energies in keV, B(E2) in W.u., Qs in e*b.
+# kind: E = level energy (sigma=50 keV, weight w); v = B(E2) value with symmetric sigma (15% floor applied: sigma_eff=max(sigma,0.15*value));
+#       log = log10 residual with factor-3 tolerance; lo/up = one-sided penalty (sigma 1 W.u.); Q = spectroscopic quadrupole moment
+# character: R = regular-dominated state, I = intruder-dominated state, G = ground state, A = lowest state of that spin
+type,observable,J_i,char_i,J_f,char_f,value,sigma,weight,source
+E,2+ band A,2,R,,,412.9,50,1,ENSDF (Kondev 2018)
+E,4+ band A,4,R,,,1004.9,50,1,ENSDF
+E,6+ band A,6,R,,,1777.2,50,1,ENSDF
+E,8+ band A,8,R,,,2422.5,50,1,ENSDF
+E,0+ band H,0,I,,,824.5,50,1,ENSDF
+E,2+ band H,2,I,,,881.1,50,1,ENSDF
+E,4+ band H,4,I,,,1207.9,50,1,ENSDF
+E,6+ band H,6,I,,,1509.2,50,1,ENSDF
+E,8+ band H,8,I,,,1969.9,50,1,ENSDF
+E,10+ band H,10,I,,,2490.8,50,1,ENSDF
+E,3+ lowest,3,A,,,1455.2,50,0.5,ENSDF
+v,B(E2;2+1->0+1),2,R,0,G,42,2,1,Siciliano PRC 102 014318 (2020)
+v,B(E2;4+1->2+1),4,R,2,R,91,40,1,Siciliano 2020 (+66/-27 symmetrised)
+v,B(E2;6+H->4+1),6,I,4,R,56,3,1,Siciliano 2020
+v,B(E2;8+H->6+H),8,I,6,I,220,17,1,Siciliano 2020
+v,B(E2;4+H->2+H),4,I,2,I,178,80,1,Siciliano 2020 (+118/-53 symmetrised)
+log,B(E2;2+H->0+1),2,I,0,G,0.045,0.013,1,Wrzosek-Lipska EPJA 55 130 (2019) Table 8
+v,B(E2;6+H->4+H),6,I,4,I,154,14,1,Siciliano 2020
+v,B(E2;10+H->8+H),10,I,8,I,155,15,1,Siciliano 2020
+lo,B(E2;6+A->4+1) lower limit,6,R,4,R,3.6,1.0,1,Siciliano 2020
+up,B(E2;0+H->2+1) derived ceiling,0,I,2,R,3.5,1.0,1,derived from T1/2=204(45) ps and E0-only decay (ENSDF)
+log,B(E2;2+H->2+1),2,I,2,R,0.64,0.22,1,Wrzosek-Lipska 2019 Table 8
+Q,Qs(2+1),2,R,,,0.76,0.38,1,Wrzosek-Lipska 2019 (+0.45/-0.30 symmetrised)

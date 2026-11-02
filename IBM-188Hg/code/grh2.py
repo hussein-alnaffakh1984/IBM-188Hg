@@ -1,0 +1,13 @@
+import sys; sys.path.insert(0,'.')
+from ibmcm import *
+m=IBMCM(10)
+H=m.H(839.4,-53.17,0.20,0.0,-38.61,-0.17,3480,20,20); r=m.solve(H,range(-2,11))
+T=m.TE2(1.42,0.20,2.13,-0.17)
+B=lambda *t: m.BE2(r,T,*t)
+lv=m.levels(r,[0,2,4,6,8,10],4)
+print('levels',{J:[round(x) for x in v[:3]] for J,v in lv.items()})
+print('regular weights 0+1,0+2,2+1,2+2,4+1,4+2,6+1,6+2:',[round(m.regular_weight(r,J,k),3) for J,k in [(0,1),(0,2),(2,1),(2,2),(4,1),(4,2),(6,1),(6,2)]])
+print('4+2->2+2 / 4+2->2+1 x100 =', round(100*B(4,2,2,2)/B(4,2,2,1)), ' (GR-H Table V: 2170; exp 8070(580))')
+print('6+1->4+2 / 6+1->4+1 x100 =', round(100*B(6,1,4,2)/B(6,1,4,1)), ' (GR-H: 97; exp 270(20))')
+print('6+2->4+2 / 6+2->4+1 x100 =', round(100*B(6,2,4,2)/B(6,2,4,1)), ' (GR-H: 240; exp 130(10))')
+print('4+1->2+2 / 4+1->2+1 x100 =', round(100*B(4,1,2,2)/B(4,1,2,1),2), ' (GR-H text: 1.24?)')

@@ -1,0 +1,13 @@
+{
+ "restricted_fit_errors_recomputed_with_cmfit_fit(diff_step=1e-3, scaled by sqrt(chi2/13))": {
+  "eN": 32.598,
+  "kN": 1.082,
+  "cN": 0.121,
+  "kI": 0.945,
+  "cI": 0.056,
+  "qN": 0.119,
+  "qI": 0.111,
+  "w0": 1.51
+ },
+ "chi2": 28.9358
+}
